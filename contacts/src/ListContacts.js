@@ -4,63 +4,80 @@ import escapeRegExp from 'escape-string-regexp'
 import sortBy from 'sort-by'
 
 class ListContacts extends Component {
-	static propTypes = {
-		contacts: PropTypes.array.isRequired,
-		onDeleteContact: PropTypes.func.isRequired
-	}
+  static propTypes = {
+    contacts: PropTypes.array.isRequired,
+    onDeleteContact: PropTypes.func.isRequired
+  }
 
-	state = {
-		query: ''
-	}
+  state = {
+    query: ''
+  }
 
-	updateQuery = (query) => {
-		this.setState({ query: query.trim() })
-	}
+  updateQuery = (query) => {
+    this.setState({ query: query.trim() })
+  }
 
-	render() {
-		const { contacts, onDeleteContact } = this.props
-		const { query } = this.state
+  clearQuery = () => {
+    this.setState({ query: '' })
+  }
 
-		let showingContacts
-		if (query) {
-			const match = new RegExp(escapeRegExp(query), 'i')
-			showingContacts = contacts.filter((contact) => match.test(contact.name))
-		} else {
-			showingContacts = contacts
-		}
+  render() {
+    const { contacts, onDeleteContact } = this.props
+    const { query } = this.state
 
-		showingContacts.sort(sortBy('name'))
+    let showingContacts
+    if (query) {
+      const match = new RegExp(escapeRegExp(query), 'i')
+      showingContacts = contacts.filter((contact) => match.test(contact.name))
+    } else {
+      showingContacts = contacts
+    }
 
-		return (
-			<div className='list-contacts'>
-				<div className='list-contacts-top'>
-					<input
-						className='search-contacts'
-						type='text'
-						placeholder='Search contacts'
-						value={query}
-						onChange={(event) => this.updateQuery(event.target.value)}
-					/>
-				</div>
-				<ol className='contact-list'>
-					{showingContacts.map((contact) => (
-						<li key={contact.id} className='contact-list-item'>
-							<div className='contact-avatar' style={{
-								backgroundImage: `url(${contact.avatarURL})`
-							}}/>
-							<div className='contact-details'>
-								<p>{contact.name}</p>
-								<p>{contact.email}</p>
-							</div>
-							<button onClick={() => onDeleteContact(contact)} className='contact-remove'>
-								Remove
-							</button>
-						</li>
-					))}
-				</ol>
-			</div>
-		)
-	}
+    showingContacts.sort(sortBy('name'))
+
+    return (
+      <div className='list-contacts'>
+        <div className='list-contacts-top'>
+          <input
+            className='search-contacts'
+            type='text'
+            placeholder='Search contacts'
+            value={query}
+            onChange={(event) => this.updateQuery(event.target.value)}
+          />
+          <a
+            href='#create'
+            onClick={this.props.onNavigate}
+            className='add-contact'
+          >Add Contact</a>
+        </div>
+
+        {showingContacts.length !== contacts.length && (
+          <div className='showing-contacts'>
+            <span>Now showing {showingContacts.length} of {contacts.length} total</span>
+            <button onClick={this.clearQuery}>Show all</button>
+          </div>
+        )}
+
+        <ol className='contact-list'>
+          {showingContacts.map((contact) => (
+            <li key={contact.id} className='contact-list-item'>
+              <div className='contact-avatar' style={{
+                backgroundImage: `url(${contact.avatarURL})`
+              }}/>
+              <div className='contact-details'>
+                <p>{contact.name}</p>
+                <p>{contact.email}</p>
+              </div>
+              <button onClick={() => onDeleteContact(contact)} className='contact-remove'>
+                Remove
+              </button>
+            </li>
+          ))}
+        </ol>
+      </div>
+    )
+  }
 }
 
 export default ListContacts
